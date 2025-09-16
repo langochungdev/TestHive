@@ -1,0 +1,211 @@
+<!--http://localhost:8080/login.html-->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Auth API</title>
+</head>
+<body>
+<h2>Test Auth API</h2>
+
+<h3>Login Form</h3>
+<form id="loginForm" onsubmit="loginUser(event)">
+    <input type="text" id="loginUsername" placeholder="Username" value="admin" required><br>
+    <input type="password" id="loginPassword" placeholder="Password" value="123" required><br>
+    <button type="submit">Login</button>
+</form>
+
+<button onclick="loginWithGoogle()">Login with Google</button>
+
+<button onclick="logout()">Logout</button>
+<button onclick="getMe()">/me</button>
+<button onclick="refreshToken()">Refresh Token</button>
+
+<h3>Register Form</h3>
+<form id="registerForm" onsubmit="registerUser(event)">
+    <input type="text" id="regUsername" placeholder="Username" required><br>
+    <input type="email" id="regEmail" placeholder="Email" required><br>
+    <input type="password" id="regPassword" placeholder="Password" required><br>
+    <input type="text" id="regFullName" placeholder="Full Name"><br>
+    <button type="submit">Register</button>
+</form>
+
+<div id="info" style="margin-top:20px; border:1px solid #ccc; padding:10px;"></div>
+
+<script>
+    let accessToken = null;
+
+    // --- đọc token từ query string sau khi redirect ---
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("token")) {
+        accessToken = params.get("token");
+        const refresh = params.get("refreshToken");
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refresh);
+        document.getElementById("info").innerHTML = `
+            <h4>Google Login thành công</h4>
+            <p><b>Access Token:</b> ${accessToken}</p>
+            <p><b>Refresh Token:</b> ${refresh}</p>
+        `;
+    } else {
+        // nếu đã login trước đó thì lấy từ localStorage
+        accessToken = localStorage.getItem("accessToken");
+    }
+
+    function generateUUID() {
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    }
+    function getOrCreateDeviceId() {
+        let id = localStorage.getItem("deviceId");
+        if (!id) {
+            id = generateUUID();
+            localStorage.setItem("deviceId", id);
+        }
+        return id;
+    }
+    function detectDeviceName() {
+        const ua = navigator.userAgent;
+        if (ua.includes("Windows")) return "Web - Windows";
+        if (ua.includes("Mac")) return "Web - MacOS";
+        if (ua.includes("Android")) return "Web - Android";
+        if (ua.includes("iPhone") || ua.includes("iPad")) return "Web - iOS";
+        return "Web - Unknown";
+    }
+
+    let pushToken = "demo-push-token";
+
+    async function loginUser(event) {
+        event.preventDefault();
+        const username = document.getElementById("loginUsername").value;
+        const password = document.getElementById("loginPassword").value;
+        const deviceId = getOrCreateDeviceId();
+        const deviceName = detectDeviceName();
+
+        const payload = {username, password, deviceId, deviceName, pushToken};
+
+        const res = await fetch("http://localhost:8080/api/auth/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload),
+            credentials: "include"
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            accessToken = data.token;
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", data.refreshToken);
+            document.getElementById("info").innerHTML = `
+                <h4>Đăng nhập thành công</h4>
+                <p><b>ID:</b> ${data.user.id}</p>
+                <p><b>Username:</b> ${data.user.username}</p>
+                <p><b>Email:</b> ${data.user.email}</p>
+                <p><b>Full name:</b> ${data.user.fullName}</p>
+                <p><b>Roles:</b> ${data.user.roles ? data.user.roles.join(", ") : ""}</p>
+                <p><b>Access Token:</b> ${data.token}</p>
+            `;
+        } else {
+            document.getElementById("info").innerHTML = "<p>Đăng nhập thất bại</p>";
+        }
+    }
+
+    function loginWithGoogle() {
+        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+    }
+
+    async function registerUser(event) {
+        event.preventDefault();
+        const user = {
+            username: document.getElementById("regUsername").value,
+            password: document.getElementById("regPassword").value,
+            email: document.getElementById("regEmail").value,
+            fullName: document.getElementById("regFullName").value
+        };
+        const res = await fetch("http://localhost:8080/api/auth/register", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(user)
+        });
+        if (res.ok) {
+            const data = await res.json();
+            alert("Đăng ký thành công: " + data.username);
+        } else {
+            alert("Đăng ký thất bại");
+        }
+    }
+
+    async function logout() {
+        const deviceId = getOrCreateDeviceId();
+        const res = await fetch("http://localhost:8080/api/auth/logout", {
+            method: "POST",
+            headers: {"X-Device-Id": deviceId},
+            credentials: "include"
+        });
+        if (res.ok) {
+            accessToken = null;
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            document.getElementById("info").innerHTML = "<p>Đã logout</p>";
+        } else {
+            alert("Logout thất bại");
+        }
+    }
+
+    async function getMe() {
+        if (!accessToken) {
+            document.getElementById("info").innerHTML = "<p>Chưa có access token</p>";
+            return;
+        }
+
+        const res = await fetch("http://localhost:8080/api/me", {
+            method: "GET",
+            headers: {"Authorization": "Bearer " + accessToken}
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById("info").innerHTML = `
+                <h4>Current User (/me)</h4>
+                <p><b>ID:</b> ${data.id}</p>
+                <p><b>Username:</b> ${data.username}</p>
+                <p><b>Email:</b> ${data.email}</p>
+                <p><b>Full name:</b> ${data.fullName}</p>
+                <p><b>Roles:</b> ${data.roles ? data.roles.join(", ") : ""}</p>
+            `;
+        } else {
+            document.getElementById("info").innerHTML = "<p>Không lấy được user hiện tại</p>";
+        }
+    }
+
+    async function refreshToken() {
+        const refresh = localStorage.getItem("refreshToken");
+        if (!refresh) {
+            document.getElementById("info").innerHTML = "<p>Chưa có refresh token</p>";
+            return;
+        }
+        const res = await fetch("http://localhost:8080/api/auth/refresh", {
+            method: "POST",
+            headers: {"Authorization": "Bearer " + refresh},
+            credentials: "include"
+        });
+        if (res.ok) {
+            const data = await res.json();
+            accessToken = data.token;
+            localStorage.setItem("accessToken", data.token);
+            localStorage.setItem("refreshToken", data.refreshToken);
+            document.getElementById("info").innerHTML = `
+                <h4>Refresh Token thành công</h4>
+                <p><b>Access Token:</b> ${data.token}</p>
+                <p><b>Expires in:</b> ${data.expiresIn}</p>
+                <p><b>Refresh Expires in:</b> ${data.refreshExpiresIn}</p>
+                <p><b>User:</b> ${data.user.username}</p>
+            `;
+        } else {
+            document.getElementById("info").innerHTML = "<p>Refresh Token thất bại</p>";
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+### OS ###
+.DS_Store
+Thumbs.db
+
+### IDE ###
+# IntelliJ
+.idea/
+*.iml
+out/
+# VSCode
+.vscode/
+
+### Logs ###
+*.log
+logs/
+
+### Environment files ###
+# FE và BE đều dùng .env
+/frontend/.env
+/frontend/.env.*.local
+/backend/.env
+/backend/.env.*.local
+
+### Backend (Spring Boot) ###
+/backend/target/
+/backend/build/
+/backend/.classpath
+/backend/.project
+/backend/.settings/
+/backend/*.iml
+
+# Maven
+/backend/.mvn/
+/backend/mvnw
+/backend/mvnw.cmd
+/backend/.mvn/wrapper/maven-wrapper.jar
+
+# Gradle (nếu dùng)
+/backend/.gradle/
+/backend/gradle/
+/backend/gradlew
+/backend/gradlew.bat
+
+# Test reports
+/backend/target/site/
+/backend/target/jacoco-report.html
+
+### Frontend (Vue.js / Node.js) ###
+/frontend/node_modules/
+/frontend/dist/
+/frontend/build/
+/frontend/.cache
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/package-lock.json
+/frontend/pnpm-lock.yaml
+/frontend/yarn.lock
+/frontend/coverage/
+
+### Docker ###
+.docker/
+docker-compose.override.yml
+*.pid
+
+### Database / Storage local ###
+*.db
+*.h2.db
+*.mv.db
+/data/

@@ -1,0 +1,69 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <property name="LOG_DIR" value="${LOG_DIR:-logs}"/>
+
+    <!-- Console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <!-- app.log -->
+    <appender name="APP" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/app.log</file>
+        <append>false</append>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+    <!-- error.log -->
+    <appender name="ERROR" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/error.log</file>
+        <append>false</append>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+
+    <!-- http.log -->
+    <appender name="HTTP" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/http.log</file>
+        <append>false</append>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+    <logger name="com.boilerplate.infrastructure.interceptor" level="INFO" additivity="false">
+        <appender-ref ref="HTTP"/>
+    </logger>
+
+    <!-- audit.log -->
+    <appender name="AUDIT" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/audit.log</file>
+        <append>false</append>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+    <logger name="com.boilerplate.common.aop" level="INFO" additivity="false">
+        <appender-ref ref="AUDIT"/>
+    </logger>
+
+    <!-- security.log -->
+    <appender name="SECURITY" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/security.log</file>
+        <append>false</append>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+    <logger name="com.boilerplate.common.aop" level="INFO" additivity="false">
+        <appender-ref ref="SECURITY"/>
+    </logger>
+
+    <!-- Root -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="APP"/>
+        <appender-ref ref="ERROR"/>
+    </root>
+</configuration>

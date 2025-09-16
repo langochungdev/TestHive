@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h2>Chat Demo với Auth + Device</h2>
+
+<!-- Form Login -->
+<h3>Login</h3>
+<form id="loginForm" onsubmit="loginUser(event)">
+    <input value="admin" type="text" id="username" placeholder="Username" required><br>
+    <input value="123" type="password" id="password" placeholder="Password" required><br>
+    <button type="submit">Login</button>
+</form>
+<p id="loginInfo"></p>
+
+<hr>
+
+<!-- Chat cá nhân -->
+<h3>Chat cá nhân</h3>
+<form id="privateForm" onsubmit="sendPrivate(event)">
+    <input id="receiverId" placeholder="Receiver UUID" required><br>
+    <input id="privateMessage" placeholder="Nội dung..." required><br>
+    <button type="submit">Gửi</button>
+</form>
+
+<!-- Chat nhóm -->
+<h3>Chat nhóm</h3>
+<form id="groupForm" onsubmit="sendGroup(event)">
+    <input id="groupId" placeholder="Group UUID" required><br>
+    <input id="groupMessage" placeholder="Nội dung..." required><br>
+    <button type="submit">Gửi</button>
+</form>
+
+<hr>
+
+<h3>Tin nhắn nhận được:</h3>
+<div id="messages" style="border:1px solid #ccc; padding:10px; height:300px; overflow:auto;"></div>
+
+<script>
+    let stompClient = null;
+    let currentUserId = null;
+    let accessToken = null;
+
+    // --- util ---
+    function generateUUID() {
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    }
+    function getOrCreateDeviceId() {
+        let id = localStorage.getItem("deviceId");
+        if (!id) {
+            id = generateUUID();
+            localStorage.setItem("deviceId", id);
+        }
+        return id;
+    }
+    function detectDeviceName() {
+        const ua = navigator.userAgent;
+        if (ua.includes("Windows")) return "Web - Windows";
+        if (ua.includes("Mac")) return "Web - MacOS";
+        if (ua.includes("Android")) return "Web - Android";
+        if (ua.includes("iPhone") || ua.includes("iPad")) return "Web - iOS";
+        return "Web - Unknown";
+    }
+
+    let pushToken = "demo-push-token";
+
+    // --- Login ---
+    async function loginUser(event) {
+        event.preventDefault();
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const deviceId = getOrCreateDeviceId();
+        const deviceName = detectDeviceName();
+
+        const payload = {username, password, deviceId, deviceName, pushToken};
+
+        const res = await fetch("http://localhost:8080/api/auth/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            currentUserId = data.user.id;
+            accessToken = data.token;
+
+            document.getElementById("loginInfo").innerHTML = `
+                <h4>Đăng nhập thành công</h4>
+                <p><b>ID:</b> ${data.user.id}</p>
+                <p><b>Username:</b> ${data.user.username}</p>
+                <p><b>Email:</b> ${data.user.email}</p>
+                <p><b>Full name:</b> ${data.user.fullName}</p>
+                <p><b>Access Token:</b> ${data.token}</p>
+                <p><b>Device ID:</b> ${deviceId}</p>
+                <p><b>Device Name:</b> ${deviceName}</p>
+                <p><b>Push Token:</b> ${pushToken}</p>
+            `;
+
+            connectWebSocket();
+        } else {
+            document.getElementById("loginInfo").innerHTML = "<p>Đăng nhập thất bại</p>";
+        }
+    }
+
+    // --- Connect WS ---
+    function connectWebSocket() {
+        let socket = new SockJS("http://localhost:8080/ws-chat?token=" + accessToken);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, async function(frame) {
+            console.log("Connected: " + frame);
+
+            stompClient.subscribe("/user/queue/messages", function(message) {
+                appendMsg("Private: " + message.body);
+            });
+
+            const res = await fetch("http://localhost:8080/api/chats/my", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + accessToken
+                }
+            });
+
+            if (res.ok) {
+                const chats = await res.json();
+                chats.forEach(chat => {
+                    if (chat.group) {
+                        stompClient.subscribe("/topic/" + chat.id, function(message) {
+                            appendMsg("Group[" + chat.chatName + "]: " + message.body);
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // --- Chat cá nhân ---
+    function sendPrivate(event) {
+        event.preventDefault();
+        stompClient.send("/app/chat.private", {}, JSON.stringify({
+            senderId: currentUserId,
+            receiverId: document.getElementById("receiverId").value,
+            content: document.getElementById("privateMessage").value,
+            token: accessToken,
+            deviceId: getOrCreateDeviceId(),
+            pushToken: pushToken
+        }));
+        document.getElementById("privateMessage").value = "";
+    }
+
+    // --- Chat nhóm ---
+    function sendGroup(event) {
+        event.preventDefault();
+        stompClient.send("/app/chat.group", {}, JSON.stringify({
+            senderId: currentUserId,
+            chatId: document.getElementById("groupId").value,
+            content: document.getElementById("groupMessage").value,
+            token: accessToken,
+            deviceId: getOrCreateDeviceId(),
+            pushToken: pushToken
+        }));
+        document.getElementById("groupMessage").value = "";
+    }
+
+    function appendMsg(text) {
+        const div = document.getElementById("messages");
+        div.innerHTML += "<p>" + text + "</p>";
+        div.scrollTop = div.scrollHeight;
+    }
+</script>
+</body>
+</html>

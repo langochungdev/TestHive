@@ -1,8 +1,4 @@
-Dưới đây là nội dung **README.md đầy đủ**, đã tích hợp cả badges block mà bạn yêu cầu:
 
----
-
-```markdown
 # 📚 Online Test Platform
 
 ![Build](https://img.shields.io/github/actions/workflow/status/<your-username>/<repo-name>/backend-ci.yml?branch=main&label=backend-build)
@@ -21,6 +17,20 @@ Dưới đây là nội dung **README.md đầy đủ**, đã tích hợp cả b
 Web app cho phép người học và giảng viên tạo, chia sẻ, và làm đề kiểm tra trực tuyến.  
 Hỗ trợ nhiều loại câu hỏi: **trắc nghiệm, điền khuyết, kèm ảnh/audio**.  
 Trong tương lai sẽ có **phân tích kết quả, gamification và mini-games**.
+
+---
+
+## 📑 Table of Contents
+
+- [🚀 Tech Stack](#-tech-stack)
+- [📂 Repository Structure](#-repository-structure)
+- [⚙️ Installation & Setup](#️-installation--setup)
+- [📊 Monitoring](#-monitoring)
+- [📖 API Documentation](#-api-documentation)
+- [🧪 Testing](#-testing)
+- [🤝 Contributing](#-contributing)
+- [📜 License](#-license)
+- [👤 Maintainer](#-maintainer)
 
 ---
 
@@ -153,14 +163,8 @@ npm run test
 
 Distributed under the MIT License. See `LICENSE` for details.
 
----
 
 ## 👤 Maintainer
 
-* [Your Name](https://github.com/<your-username>)
+[<img src="https://github.com/langochungdev.png" width="50" height="50" style="border-radius:50%"/>](https://github.com/langochungdev)
 
-```
-
----
-
-```

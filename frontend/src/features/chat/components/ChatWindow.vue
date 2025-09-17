@@ -1,6 +1,8 @@
 <template>
-    <div class="chat-window">
-        <div v-for="(msg, i) in messages" :key="i" class="chat-message">
+    <div
+        class="border border-gray-300 p-3 h-72 overflow-y-auto rounded-lg bg-white"
+    >
+        <div v-for="(msg, i) in messages" :key="i" class="my-1">
             <strong>{{ msg.user }}:</strong>
             {{ msg.text }}
         </div>
@@ -8,17 +10,7 @@
 </template>
 
 <script setup>
-defineProps({ messages: { type: Array, required: true } })
+defineProps({
+    messages: { type: Array, required: true },
+})
 </script>
-
-<style scoped>
-.chat-window {
-    border: 1px solid #ccc;
-    padding: 10px;
-    height: 300px;
-    overflow-y: auto;
-}
-.chat-message {
-    margin: 4px 0;
-}
-</style>

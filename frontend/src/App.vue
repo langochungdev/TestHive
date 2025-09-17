@@ -1,5 +1,5 @@
 <template>
-    <div class="container py-3">
+    <div class="max-w-6xl mx-auto py-6 px-4">
         <ThemeToggle />
         <LanguageToggle />
         <router-view />

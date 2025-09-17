@@ -1,2 +1,0 @@
-// Socket config
-export default {};

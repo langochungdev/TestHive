@@ -1,50 +1,95 @@
 <template>
-    <div class="max-w-md mx-auto mt-8 px-4">
-        <form
-            class="bg-white shadow rounded-xl p-6"
-            @submit.prevent="handleSubmit"
-        >
-            <div class="mb-4">
-                <input
-                    v-model="form.username"
-                    type="text"
-                    :placeholder="$t('username')"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-            </div>
+    <!--
+  This example requires updating your template:
 
-            <div class="mb-4">
-                <input
-                    v-model="form.password"
-                    type="password"
-                    :placeholder="$t('password')"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-            </div>
-
-            <button
-                type="submit"
-                class="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition"
+  ```
+  <html class="h-full bg-gray-900">
+  <body class="h-full">
+  ```
+-->
+    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+            <img
+                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
+                alt="Your Company"
+                class="mx-auto h-10 w-auto"
+            />
+            <h2
+                class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-white"
             >
-                {{ $t('login') }}
-            </button>
+                Sign in to your account
+            </h2>
+        </div>
 
-            <div
-                v-if="error"
-                class="mt-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3"
-            >
-                {{ error }}
-            </div>
-        </form>
+        <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <form action="#" method="POST" class="space-y-6">
+                <div>
+                    <label
+                        for="email"
+                        class="block text-sm/6 font-medium text-gray-100"
+                    >
+                        Email address
+                    </label>
+                    <div class="mt-2">
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            required
+                            autocomplete="email"
+                            class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between">
+                        <label
+                            for="password"
+                            class="block text-sm/6 font-medium text-gray-100"
+                        >
+                            Password
+                        </label>
+                        <div class="text-sm">
+                            <a
+                                href="#"
+                                class="font-semibold text-indigo-400 hover:text-indigo-300"
+                            >
+                                Forgot password?
+                            </a>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            required
+                            autocomplete="current-password"
+                            class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <button
+                        type="submit"
+                        class="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                    >
+                        Sign in
+                    </button>
+                </div>
+            </form>
+
+            <p class="mt-10 text-center text-sm/6 text-gray-400">
+                Not a member?
+                <a
+                    href="#"
+                    class="font-semibold text-indigo-400 hover:text-indigo-300"
+                >
+                    Start a 14 day free trial
+                </a>
+            </p>
+        </div>
     </div>
 </template>
-
-<script setup>
-import { reactive } from 'vue'
-import { useAuth } from '../composables/useAuth'
-
-const { login, error } = useAuth()
-const form = reactive({ username: '', password: '' })
-
-const handleSubmit = () => login(form)
-</script>

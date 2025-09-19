@@ -1,9 +1,15 @@
 <template>
-    <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-outline-primary" @click="setLang('en')">
+    <div class="flex gap-2">
+        <button
+            class="px-3 py-1.5 text-sm rounded border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition"
+            @click="setLang('en')"
+        >
             EN
         </button>
-        <button class="btn btn-sm btn-outline-primary" @click="setLang('vi')">
+        <button
+            class="px-3 py-1.5 text-sm rounded border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition"
+            @click="setLang('vi')"
+        >
             VI
         </button>
     </div>

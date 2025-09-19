@@ -1,10 +1,10 @@
 <template>
     <MainLayout>
-        <LoginForm />
+        <SignUpForm />
     </MainLayout>
 </template>
 
 <script setup>
-import LoginForm from '../components/LoginForm.vue'
+import SignUpForm from '../components/SignUpForm.vue'
 import MainLayout from '@/app/layouts/MainLayout.vue'
 </script>

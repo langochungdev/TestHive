@@ -1,4 +1,3 @@
-// src/app/store/useThemeStore.ts
 import { defineStore } from 'pinia'
 
 export const useThemeStore = defineStore('theme', {
@@ -7,12 +6,20 @@ export const useThemeStore = defineStore('theme', {
     }),
     actions: {
         init() {
-            document.documentElement.classList.toggle('dark', this.dark)
+            if (this.dark) {
+                document.documentElement.classList.add('dark')
+            } else {
+                document.documentElement.classList.remove('dark')
+            }
         },
         toggle() {
             this.dark = !this.dark
             localStorage.setItem('theme', this.dark ? 'dark' : 'light')
-            document.documentElement.classList.toggle('dark', this.dark)
+            if (this.dark) {
+                document.documentElement.classList.add('dark')
+            } else {
+                document.documentElement.classList.remove('dark')
+            }
         },
     },
 })

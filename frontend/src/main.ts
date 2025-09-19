@@ -12,7 +12,6 @@ app.use(pinia)
 app.use(router)
 app.use(i18n)
 
-// gọi init sau khi pinia sẵn sàng
 const theme = useThemeStore()
 theme.init()
 
